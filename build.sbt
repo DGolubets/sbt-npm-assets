@@ -5,8 +5,7 @@ sbtPlugin := true
 scalaVersion := "2.12.4"
 crossSbtVersions := Seq("0.13.16", "1.0.4")
 
-addSbtPlugin("com.typesafe.sbt" % "sbt-web" % "1.4.3")
-addSbtPlugin("com.typesafe.sbt" % "sbt-native-packager" % "1.3.2")
+addSbtPlugin("com.typesafe.play" % "sbt-plugin" % "2.6.7")
 
 bintrayRepository := "sbt-plugins"
 bintrayOrganization in bintray := None
