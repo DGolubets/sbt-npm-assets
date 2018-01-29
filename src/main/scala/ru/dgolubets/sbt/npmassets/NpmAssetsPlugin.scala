@@ -49,7 +49,8 @@ object NpmAssetsPlugin extends AutoPlugin {
     playRunHooks += playHook.value,
     exportedMappings in Assets := Seq(), // https://github.com/playframework/playframework/issues/5242
     sourceGenerators in Assets += (sources in NpmAssets).taskValue,
-    pipelineStages in Assets += (filter in NpmAssets)
+    pipelineStages in Assets += (filter in NpmAssets),
+    playMonitoredFiles := monitoredFiles.value
   )
 
   private def generateSources = Def.task {
@@ -60,6 +61,18 @@ object NpmAssetsPlugin extends AutoPlugin {
   private def filterSources = Def.task { mappings: Seq[PathMapping] =>
     val sourceDir = (sourceDirectory in NpmAssets).value
     mappings.filter { case (file, _) => file.relativeTo(sourceDir).isEmpty } // exclude sources
+  }
+
+  private def monitoredFiles = Def.task {
+    val isAsync = (asyncDev in NpmAssets).value
+    val sourceDir = (sourceDirectory in NpmAssets).value
+    val files = playMonitoredFiles.value
+    if(isAsync){
+      // async dev assumes NPM is watching over sources itself
+      files.filterNot(_.relativeTo(sourceDir).nonEmpty)
+    } else {
+      files
+    }
   }
 
   private lazy val playHook = Def.task {
