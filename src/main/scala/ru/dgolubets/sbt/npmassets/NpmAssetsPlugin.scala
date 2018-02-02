@@ -22,6 +22,7 @@ object NpmAssetsPlugin extends AutoPlugin {
     val scriptName = settingKey[String]("NPM script to start on assets task")
     val asyncDev = settingKey[Boolean]("Run NPM script asynchronously in development mode.")
     val filter = taskKey[Pipeline.Stage]("Filter sources")
+    val autoInstall = settingKey[Boolean]("Run NPM install automatically.")
   }
 
   object Configurations extends Configurations
@@ -41,6 +42,7 @@ object NpmAssetsPlugin extends AutoPlugin {
     sourceDirectory := (sourceDirectory in Assets).value,
     envVars := Map.empty,
     asyncDev := false,
+    autoInstall:= true,
     sources in NpmAssets := generateSources.value,
     filter in NpmAssets := filterSources.value
   ))
@@ -87,7 +89,8 @@ object NpmAssetsPlugin extends AutoPlugin {
         (sourceDirectory in NpmAssets).value,
         (public in Assets).value,
         (envVars in NpmAssets).value,
-        (asyncDev in NpmAssets).value)
+        (asyncDev in NpmAssets).value,
+        (autoInstall in NpmAssets).value)
     )
   }
 

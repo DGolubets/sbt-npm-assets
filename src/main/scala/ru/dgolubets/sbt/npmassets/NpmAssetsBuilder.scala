@@ -13,7 +13,10 @@ class NpmAssetsBuilder(settings: NpmAssetsBuilderSettings){
     }
     else {
       npm.stop()
-      npm.start(settings.scriptName, settings.cwd, environmentVariables(isDevMode))
+      if(settings.autoInstall) {
+        npm.install(settings.cwd)
+      }
+      npm.run(settings.scriptName, settings.cwd, environmentVariables(isDevMode))
 
       if(!isDevMode || !settings.asyncDev) {
         val exitCode = npm.waitFor()

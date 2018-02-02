@@ -11,7 +11,11 @@ class Npm() {
 
   private var process: Option[Process] = None
 
-  def start(scriptName: String, cwd: File, envVars: Map[String, String]): Unit = {
+  def install(cwd: File): Unit = {
+    ProcessUtil.exec("npm", "install" :: Nil, cwd = Some(cwd)).waitFor()
+  }
+
+  def run(scriptName: String, cwd: File, envVars: Map[String, String]): Unit = {
     val p = ProcessUtil.exec("npm", "run" :: scriptName :: Nil, envVars, Some(cwd))
     process = Some(p)
   }

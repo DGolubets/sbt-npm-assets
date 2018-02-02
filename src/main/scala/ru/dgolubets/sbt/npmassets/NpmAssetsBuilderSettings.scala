@@ -7,4 +7,5 @@ case class NpmAssetsBuilderSettings(scriptName: String,
                                     source: File,
                                     target: File,
                                     envVars: Map[String, String],
-                                    asyncDev: Boolean)
+                                    asyncDev: Boolean,
+                                    autoInstall: Boolean)
