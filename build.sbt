@@ -15,6 +15,11 @@ licenses += ("MIT", url("https://opensource.org/licenses/MIT"))
 publishMavenStyle := false
 publishArtifact in Test := false
 
+libraryDependencies ++= Seq(
+  "net.java.dev.jna" % "jna" % "4.5.1",
+  "net.java.dev.jna" % "jna-platform" % "4.5.1"
+)
+
 import sbtrelease.ReleasePlugin.autoImport.ReleaseTransformations._
 
 releaseProcess := Seq[ReleaseStep](
