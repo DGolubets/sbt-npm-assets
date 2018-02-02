@@ -42,7 +42,7 @@ object NpmAssetsPlugin extends AutoPlugin {
     envVars := Map.empty,
     asyncDev := false,
     sources in NpmAssets := generateSources.value,
-    filter in NpmAssets := filterSources.value,
+    filter in NpmAssets := filterSources.value
   ))
 
   private def hackSettings: Seq[Def.Setting[_]] = Seq(
