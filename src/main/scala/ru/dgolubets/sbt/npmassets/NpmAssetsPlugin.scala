@@ -42,7 +42,7 @@ object NpmAssetsPlugin extends AutoPlugin {
     sourceDirectory := (sourceDirectory in Assets).value,
     envVars := Map.empty,
     asyncDev := false,
-    autoInstall:= true,
+    autoInstall := true,
     sources in NpmAssets := generateSources.value,
     filter in NpmAssets := filterSources.value
   ))
@@ -57,19 +57,27 @@ object NpmAssetsPlugin extends AutoPlugin {
 
   private def generateSources = Def.task {
     npmAssetsBuilder.value.run()
-    Nil
   }
 
   private def filterSources = Def.task { mappings: Seq[PathMapping] =>
     val sourceDir = (sourceDirectory in NpmAssets).value
-    mappings.filter { case (file, _) => file.relativeTo(sourceDir).isEmpty } // exclude sources
+    val targetDir = (public in Assets).value
+    mappings
+      .filter { case (file, _) => file.relativeTo(sourceDir).isEmpty } // exclude sources
+      .map {
+      case m @ (file, _) =>
+        file
+          .relativeTo(targetDir)
+          .map(f => (file, f.toString))
+          .getOrElse(m) // fallback to original mapping if it comes from somewhere else
+    }
   }
 
   private def monitoredFiles = Def.task {
     val isAsync = (asyncDev in NpmAssets).value
     val sourceDir = (sourceDirectory in NpmAssets).value
     val files = playMonitoredFiles.value
-    if(isAsync){
+    if (isAsync) {
       // async dev assumes NPM is watching over sources itself
       files.filterNot(_.relativeTo(sourceDir).nonEmpty)
     } else {
