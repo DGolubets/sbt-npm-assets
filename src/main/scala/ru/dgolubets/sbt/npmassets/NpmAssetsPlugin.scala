@@ -40,6 +40,7 @@ object NpmAssetsPlugin extends AutoPlugin {
   private def defaultSettings: Seq[Def.Setting[_]] = inConfig(NpmAssets)(Seq(
     scriptName := "assets",
     sourceDirectory := (sourceDirectory in Assets).value,
+    target in NpmAssets := target.value / "npm-assets",
     envVars := Map.empty,
     asyncDev := false,
     autoInstall := true,
@@ -61,7 +62,8 @@ object NpmAssetsPlugin extends AutoPlugin {
 
   private def filterSources = Def.task { mappings: Seq[PathMapping] =>
     val sourceDir = (sourceDirectory in NpmAssets).value
-    val targetDir = (public in Assets).value
+    val targetDir = (target in NpmAssets).value
+
     mappings
       .filter { case (file, _) => file.relativeTo(sourceDir).isEmpty } // exclude sources
       .map {
@@ -86,7 +88,9 @@ object NpmAssetsPlugin extends AutoPlugin {
   }
 
   private lazy val playHook = Def.task {
-    new NpmAssetsPlayRunHook(npmAssetsBuilder.value)
+    val isAsync = (asyncDev in NpmAssets).value
+    val builder = npmAssetsBuilder.value
+    new NpmAssetsPlayRunHook(builder, isAsync)
   }
 
   private lazy val npmAssetsBuilder = Def.task {
@@ -95,6 +99,7 @@ object NpmAssetsPlugin extends AutoPlugin {
         (scriptName in NpmAssets).value,
         (baseDirectory in NpmAssets).value,
         (sourceDirectory in NpmAssets).value,
+        (target in NpmAssets).value,
         (public in Assets).value,
         (envVars in NpmAssets).value,
         (asyncDev in NpmAssets).value,

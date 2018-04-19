@@ -2,13 +2,22 @@ package ru.dgolubets.sbt.npmassets
 
 import play.sbt.PlayRunHook
 
-class NpmAssetsPlayRunHook(builder: NpmAssetsBuilder) extends PlayRunHook {
+class NpmAssetsPlayRunHook(builder: NpmAssetsBuilder, isAsync: Boolean) extends PlayRunHook {
 
   override def beforeStarted(): Unit = {
-    builder.run(true)
+    // set dev mode until Play is running
+    builder.setDevMode(true)
+
+    if(isAsync) {
+      builder.run()
+    }
   }
 
   override def afterStopped(): Unit = {
-    builder.stop()
+    if(isAsync) {
+      builder.stop()
+    }
+
+    builder.setDevMode(false)
   }
 }

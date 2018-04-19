@@ -11,25 +11,39 @@ import scala.collection.JavaConverters._
 class NpmAssetsBuilder(settings: NpmAssetsBuilderSettings) {
 
   private val npm: Npm = new Npm()
+  private var isDevMode: Boolean = false
+  private var npmInstallExecuted: Boolean = false
 
-  def run(isDevMode: Boolean = false): Seq[File] = {
+  def setDevMode(enable: Boolean): Unit = {
+    isDevMode = enable
+  }
+
+  def run(): Seq[File] = {
     if (npm.isRunning) {
       // async process is still running
       Nil
     }
     else {
-      npm.stop()
-      if (settings.autoInstall) {
-        npm.install(settings.cwd)
-      }
-      npm.run(settings.scriptName, settings.cwd, environmentVariables(isDevMode))
+      val isAsyncMode = isDevMode && settings.asyncDev
 
-      if (!isDevMode || !settings.asyncDev) {
+      if (settings.autoInstall && (!isDevMode || !npmInstallExecuted)) {
+        npm.install(settings.cwd)
+        npmInstallExecuted = true
+      }
+
+      // in async mode we usually want to write directly to folder where Play is serving assets from
+      val targetDir =
+        if (isAsyncMode) settings.targetInAsync
+        else settings.target
+
+      npm.run(settings.scriptName, settings.cwd, environmentVariables(settings.source, targetDir, isDevMode))
+
+      if (!isAsyncMode) {
         val exitCode = npm.waitFor()
         if (exitCode != 0) {
           sys.error(s"NPM exit with code: $exitCode")
         }
-        collectFiles(settings.target)
+        collectFiles(targetDir)
       }
       else Nil
     }
@@ -39,10 +53,10 @@ class NpmAssetsBuilder(settings: NpmAssetsBuilderSettings) {
     npm.stop()
   }
 
-  private def environmentVariables(isDevMode: Boolean) = {
+  private def environmentVariables(source: File, target: File, isDevMode: Boolean) = {
     Map(
-      "SOURCE_DIR" -> settings.source.getAbsolutePath,
-      "TARGET_DIR" -> settings.target.getAbsolutePath,
+      "SOURCE_DIR" -> source.getAbsolutePath,
+      "TARGET_DIR" -> target.getAbsolutePath,
       "DEV_MODE" -> isDevMode.toString
     ) ++ settings.envVars
   }
