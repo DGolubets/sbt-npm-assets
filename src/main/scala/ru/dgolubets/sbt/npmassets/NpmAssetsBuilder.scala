@@ -57,7 +57,8 @@ class NpmAssetsBuilder(settings: NpmAssetsBuilderSettings) {
     Map(
       "SOURCE_DIR" -> source.getAbsolutePath,
       "TARGET_DIR" -> target.getAbsolutePath,
-      "DEV_MODE" -> isDevMode.toString
+      "DEV_MODE" -> isDevMode.toString,
+      "NODE_ENV" -> (if(isDevMode) "development" else "production")
     ) ++ settings.envVars
   }
 
